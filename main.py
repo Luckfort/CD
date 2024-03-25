@@ -123,7 +123,7 @@ for i in range(tot_layer):
 labels_log = np.zeros(len(rp_log_data_list[0]))
 labels_question = np.ones(len(rp_question_data_list[0]))
 if args.dataset == 'hateeval':
-    labels_other = int(2) * np.ones(len(rp_question_data_list[0]))
+    labels_other = int(2) * np.ones(len(rp_other_data_list[0]))
 
 print("Evaluating ...")
 for i in range(tot_layer):
@@ -170,11 +170,14 @@ for i in range(tot_layer):
     print(f'F1 Score: {f1}')
 
     # Predict the probability of test dataset. (For ROC AUC, we need probabilities instead of label)
-    y_prob = classifier.predict_proba(X_test)[:, 1]  # supposed + class is 1.
+    if args.dataset == 'hateeval':
+        y_prob = classifier.predict_proba(X_test)
+    else:
+        y_prob = classifier.predict_proba(X_test)[:, 1]  # supposed + class is 1.
 
     # Calc and print ROC, AUC
     if args.dataset == 'hateeval':
-        roc_auc = roc_auc_score(y, y_prob, average='macro', multi_class='ovo',labels=[0, 1, 2])
+        roc_auc = roc_auc_score(y_test, y_prob, average='macro', multi_class='ovo',labels=[0, 1, 2])
     else:
         roc_auc = roc_auc_score(y_test, y_prob)
     print(f'ROC AUC Score: {roc_auc}')
