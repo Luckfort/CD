@@ -24,14 +24,20 @@ if args.quant != 32:
         quantization_config1 = BitsAndBytesConfig(load_in_8bit=True)
     elif args.quant == 16:
         quantization_config1 = BitsAndBytesConfig(load_in_16bit=True)
+    elif args.quant == 4:
+        quantization_config1 = BitsAndBytesConfig(load_in_4bit=True)
     else:
-        raise ValueError("We don't have this quantization bit! Please try 8, 16, 32.")
+        raise ValueError("We don't have this quantization bit! Please try 4, 8, 16, 32.")
 
 tokenizer = AutoTokenizer.from_pretrained(args.model)
-if args.quant != 32:
-    model = AutoModelForCausalLM.from_pretrained(args.model, quantization_config = quantization_config1)
-else:
+if args.quant == 32:
     model = AutoModelForCausalLM.from_pretrained(args.model)
+elif args.quant in [4,8]:
+    model = AutoModelForCausalLM.from_pretrained(args.model, quantization_config = quantization_config1)
+elif args.quant in [16]:
+    model = AutoModelForCausalLM.from_pretrained(args.model, device_map="auto", torch_dtype=torch.bfloat16)
+else:
+    raise ValueError("We don't have this quantization bit! Please try 4, 8, 16, 32.")
 
 file_path = args.datapath
 
