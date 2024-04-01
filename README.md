@@ -1,2 +1,2 @@
 # CD
-Conceptual Depth
+Concept Depth
