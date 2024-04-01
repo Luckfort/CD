@@ -2,6 +2,9 @@ from dataset import DataProcessing
 import json
 from utils import add_noise, LLM
 import argparse
+import os
+#os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
+
 import torch
 #from huggingface_hub import notebook_login
 #notebook_login()
@@ -9,7 +12,8 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--savepath', type=str, default="../lab_rs1/", help="Path for save Result")
+parser.add_argument('--savepath', type=str, default="./lab_rs/", help="Path for save Result")
+parser.add_argument('--model_path', type=str, default="/home/ruijiew2/jh88/workspace/code/")
 parser.add_argument('--dataset', type=str, default='STSA', help="Dataset")
 parser.add_argument('--datapath', type=str, default='./dataset/stsa.binary.train', help="Default data path")
 parser.add_argument('--model', type=str, default='google/gemma-7b', help="Which LLM to use")
@@ -23,21 +27,26 @@ if args.quant != 32:
     if args.quant == 8:
         quantization_config1 = BitsAndBytesConfig(load_in_8bit=True)
     elif args.quant == 16:
-        quantization_config1 = BitsAndBytesConfig(load_in_16bit=True)
+        pass
     elif args.quant == 4:
         quantization_config1 = BitsAndBytesConfig(load_in_4bit=True)
     else:
         raise ValueError("We don't have this quantization bit! Please try 4, 8, 16, 32.")
 
-tokenizer = AutoTokenizer.from_pretrained(args.model)
+cache_dir = args.model_path
+tokenizer = AutoTokenizer.from_pretrained(args.model, cache_dir = cache_dir)
 if args.quant == 32:
-    model = AutoModelForCausalLM.from_pretrained(args.model)
+    model = AutoModelForCausalLM.from_pretrained(args.model, cache_dir = cache_dir)
 elif args.quant in [4,8]:
-    model = AutoModelForCausalLM.from_pretrained(args.model, quantization_config = quantization_config1)
+    model = AutoModelForCausalLM.from_pretrained(args.model, quantization_config = quantization_config1, cache_dir = cache_dir)
 elif args.quant in [16]:
-    model = AutoModelForCausalLM.from_pretrained(args.model, device_map="auto", torch_dtype=torch.bfloat16)
+    model = AutoModelForCausalLM.from_pretrained(args.model, device_map="auto", torch_dtype=torch.bfloat16, cache_dir = cache_dir)
 else:
     raise ValueError("We don't have this quantization bit! Please try 4, 8, 16, 32.")
+
+#print(model.named_parameters())
+#for name, para in model.named_parameters():
+#    print(name, para)
 
 file_path = args.datapath
 
@@ -48,7 +57,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, roc_auc_score, f1_score
 from tqdm import tqdm
 
-model_2_layer = {"google/gemma-7b": 28, "google/gemma-2b": 18, "meta-llama/Llama-2-7b-chat-hf": 32}
+model_2_layer = {"google/gemma-7b": 28, "google/gemma-2b": 18, "meta-llama/Llama-2-7b-chat-hf": 32,
+                 "meta-llama/Llama-2-13b-chat-hf": 40, "meta-llama/Llama-2-70b-chat-hf": 80,
+                 "Qwen/Qwen1.5-0.5B": 24, "Qwen/Qwen1.5-1.8B": 24, "Qwen/Qwen1.5-4B": 40, 
+                 "Qwen/Qwen1.5-7B": 32, "Qwen/Qwen1.5-14B": 40, "Qwen/Qwen1.5-72B": 80}
 tot_layer = model_2_layer[args.model]
 
 DP = DataProcessing(data_path=args.datapath, data_name=args.dataset, noise=args.noise)
@@ -208,7 +220,7 @@ def SaveDataset(filename, dataset):
         f.write(dict_json)
         f.close()
 
-model_name_refresh = {"google/gemma-7b":"gemma-7b", "google/gemma-2b": "gemma-2b", "meta-llama/Llama-2-7b-chat-hf": "Llama-7b"}
+model_name_refresh = {"google/gemma-7b":"gemma-7b", "google/gemma-2b": "gemma-2b", "meta-llama/Llama-2-7b-chat-hf": "Llama-7b", "meta-llama/Llama-2-13b-chat-hf":"Llama-13b", "meta-llama/Llama-2-70b-chat-hf":"Llama-70b","Qwen/Qwen1.5-0.5B":"Qwen-0.5B","Qwen/Qwen1.5-1.8B":"Qwen-1.8B","Qwen/Qwen1.5-4B":"Qwen-4B","Qwen/Qwen1.5-7B":"Qwen-7B","Qwen/Qwen1.5-14B":"Qwen-14B","Qwen/Qwen1.5-72B":"Qwen-72B"}
 model_name = model_name_refresh[args.model]
 
 save_path_final = args.savepath + f"{args.dataset}_{model_name}_{args.quant}_{args.noise}_{args.clf}.json"

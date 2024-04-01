@@ -190,7 +190,7 @@ class DataProcessing():
             else:
                 list_false_noise.append(list_false[i])
         
-        return list_true_noise, list_false_noise
+        return list_true_noise[:3000], list_false_noise[:3000]
     
     def counterfact(self):
         csv_file_path = './dataset/counterfact.csv'
