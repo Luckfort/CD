@@ -15,7 +15,6 @@ class DataProcessing():
     """
     def dispacher(self):
         cot = None
-        r = None
         if self.data_name == 'StrategyQA':
             p, q = self.StrategyQA()
             prompt = 'Judge the question is true or false?'  + '\n' \
@@ -41,7 +40,7 @@ class DataProcessing():
             prompt = 'Judge the statement is true or false.'
         
         elif self.data_name == 'hateeval':
-            p, q, r = self.hateeval()
+            p, q = self.hateeval()
             prompt = 'According to the comment, tell whether they present hate speech, whether they target a specific person, and whether the tweet poster is aggressive.'
             
         elif self.data_name == 'STSA':
@@ -60,7 +59,7 @@ class DataProcessing():
                     'In other words, the speaker is saying one thing but meaning the opposite. '
             cot = 'Think carefully according to the sentence. Is there any sarcasm in this sentence. Please answer Yes or No.'   
         
-        return p, q, r, prompt, cot
+        return p, q, prompt, cot
     
     """
         return the context that we enter to LLM.
@@ -224,11 +223,9 @@ class DataProcessing():
                 i = add_noise(i)
             if a== 1 :
                 list1.append(i)
-            if b== 1 :
+            else :
                 list2.append(i)
-            if c== 1 :
-                list3.append(i)
-        return list1[:3000], list2[:3000], list3[:3000]
+        return list1[:3000], list2[:3000]
     
     def IMDb(self):
         dataset = load_dataset("imdb")

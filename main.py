@@ -13,7 +13,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--savepath', type=str, default="./lab_rs/", help="Path for save Result")
-parser.add_argument('--model_path', type=str, default="/home/ruijiew2/jh88/workspace/code/")
+parser.add_argument('--model_path', type=str, default="./")
 parser.add_argument('--dataset', type=str, default='STSA', help="Dataset")
 parser.add_argument('--datapath', type=str, default='./dataset/stsa.binary.train', help="Default data path")
 parser.add_argument('--model', type=str, default='google/gemma-7b', help="Which LLM to use")
@@ -40,7 +40,7 @@ if args.quant == 32:
 elif args.quant in [4,8]:
     model = AutoModelForCausalLM.from_pretrained(args.model, quantization_config = quantization_config1, cache_dir = cache_dir)
 elif args.quant in [16]:
-    model = AutoModelForCausalLM.from_pretrained(args.model, device_map="auto", torch_dtype=torch.bfloat16, cache_dir = cache_dir)
+    model = AutoModelForCausalLM.from_pretrained(args.model, torch_dtype=torch.bfloat16, cache_dir = cache_dir)
 else:
     raise ValueError("We don't have this quantization bit! Please try 4, 8, 16, 32.")
 
@@ -66,7 +66,7 @@ tot_layer = model_2_layer[args.model]
 DP = DataProcessing(data_path=args.datapath, data_name=args.dataset, noise=args.noise)
 
 # The prompts are different among the datasets!!!
-p_question, n_question, r_question, prompt, cot = DP.dispacher()
+p_question, n_question, prompt, cot = DP.dispacher()
 
 Model = LLM(cuda_id = args.cuda, layer_num = tot_layer, quant = args.quant)
 
@@ -80,11 +80,9 @@ rp_questions_dic =[]
 rp_log_dic = []
 rp_logs = [[] for _ in range(tot_layer)]
 rp_questions = [[] for _ in range(tot_layer)]
-rp_others = [[] for _ in range(tot_layer)]
 
 rp_log_data_list = []
 rp_question_data_list = []
-rp_other_data_list = []
 
 for q in tqdm(p_question) :
     input_text = DP.get_prompt(prompt, cot, q)
@@ -95,7 +93,10 @@ for q in tqdm(p_question) :
         hs_i = hs[i,:,:]
         # print("hs_i_rp_logs",hs_i.shape)
         hs_i = hs_i[-1,:].cpu()
-        hs_i = hs_i.numpy()
+        try:
+            hs_i = hs_i.numpy()
+        except:
+            hs_i = hs_i.float().numpy()
         # print("hs_i_rp_logs",hs_i.shape)
 
         rp_logs[i].append(hs_i)
@@ -111,37 +112,20 @@ for q in tqdm(n_question) :
         # print("hs_i_rp_questions",hs_i.shape)
 
         hs_i = hs_i[-1,:].cpu()
-        hs_i = hs_i.numpy()
+        try:
+            hs_i = hs_i.numpy()
+        except:
+            hs_i = hs_i.float().numpy()
         # print("hs_i_rp_questions",hs_i.shape)
 
         rp_questions[i].append(hs_i)
 
-if args.dataset == 'hateeval':
-    for q in tqdm(r_question) :
-        input_text = DP.get_prompt(prompt, cot, q)
-        with torch.no_grad():
-            input_ids = tokenizer(input_text, return_tensors="pt").input_ids
-            hs = Model.get_hidden_states(model,tokenizer, input_text)
-        for i in range(tot_layer):
-            hs_i = hs[i,:,:]
-            # print("hs_i_rp_questions",hs_i.shape)
-
-            hs_i = hs_i[-1,:].cpu()
-            hs_i = hs_i.numpy()
-            # print("hs_i_rp_questions",hs_i.shape)
-
-            rp_others[i].append(hs_i)
-
 for i in range(tot_layer):
     rp_log_data_list.append(np.array([tensor for tensor in rp_logs[i]]))
     rp_question_data_list.append(np.array([tensor for tensor in rp_questions[i]]))
-    if args.dataset == 'hateeval':
-        rp_other_data_list.append(np.array([tensor for tensor in rp_others[i]]))
 
 labels_log = np.zeros(len(rp_log_data_list[0]))
 labels_question = np.ones(len(rp_question_data_list[0]))
-if args.dataset == 'hateeval':
-    labels_other = int(2) * np.ones(len(rp_other_data_list[0]))
 
 print("Evaluating ...")
 for i in range(tot_layer):
@@ -152,15 +136,10 @@ for i in range(tot_layer):
     #rp_question_data_i = globals()[rp_question_data_var_name]
     rp_log_data_i = rp_log_data_list[i]
     rp_question_data_i = rp_question_data_list[i]
-    if args.dataset == 'hateeval':
-        rp_other_data_i = rp_other_data_list[i]
 
-    if args.dataset != 'hateeval':
-        X = np.concatenate((rp_log_data_i, rp_question_data_i), axis=0)
-        y = np.concatenate((labels_log, labels_question), axis=0)
-    else:
-        X = np.concatenate((rp_log_data_i, rp_question_data_i, rp_other_data_i), axis=0)
-        y = np.concatenate((labels_log, labels_question, labels_other), axis=0)
+    X = np.concatenate((rp_log_data_i, rp_question_data_i), axis=0)
+    y = np.concatenate((labels_log, labels_question), axis=0)
+    
     # Merge data and labels
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
 
@@ -181,26 +160,16 @@ for i in range(tot_layer):
 
     # Compute and print F1
     # 'binary' for bi-classification problems; 'micro', 'macro' or 'weighted' for multi-classification problems
-    if args.dataset == 'hateeval':
-        f1 = f1_score(y_test, y_pred, average='macro')  
-    else:
-        f1 = f1_score(y_test, y_pred, average='binary')  
+    f1 = f1_score(y_test, y_pred, average='binary')  
     print(f'F1 Score: {f1}')
 
     # Predict the probability of test dataset. (For ROC AUC, we need probabilities instead of label)
-    if args.dataset == 'hateeval':
-        y_prob = classifier.predict_proba(X_test)
-    else:
-        y_prob = classifier.predict_proba(X_test)[:, 1]  # supposed + class is 1.
+    y_prob = classifier.predict_proba(X_test)[:, 1]  # supposed + class is 1.
 
     # Calc and print ROC, AUC
-    if args.dataset == 'hateeval':
-        roc_auc = roc_auc_score(y_test, y_prob, average='macro', multi_class='ovo',labels=[0, 1, 2])
-    else:
-        roc_auc = roc_auc_score(y_test, y_prob)
+    roc_auc = roc_auc_score(y_test, y_prob)
     print(f'ROC AUC Score: {roc_auc}')
 
-    
     list_acc.append(accuracy)
     list_f1.append(f1)
     list_auc.append(roc_auc)
