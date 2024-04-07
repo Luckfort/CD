@@ -10,8 +10,6 @@ import random
 # warnings.filterwarnings('ignore')
 
 # This is the script to run the OpenKE model in parallel;
-# data_name = 'yago'
-# support model: [transe]
 
 script = "main.py"
 
@@ -33,21 +31,19 @@ def run_model(task):
 """
 def run_LLM():
     task_id, tasks = 0, []
-    #data_name_list = ['StrategyQA','coinflip','cities','common','counterfact','STSA','IMDb','sarcasm','hateeval']
-    data_name_list = ['IMDb','sarcasm','hateeval']
-    #data_name_list = ['sarcasm','STSA']
-    #model_name_list = ["google/gemma-7b"]
-    #model_name_list = ["Qwen/Qwen1.5-0.5B", "Qwen/Qwen1.5-1.8B", "Qwen/Qwen1.5-4B","Qwen/Qwen1.5-7B", "Qwen/Qwen1.5-14B"]
-    #model_name_list = ["Qwen/Qwen1.5-0.5B", "Qwen/Qwen1.5-1.8B", "Qwen/Qwen1.5-4B"] # cuda 3
-    #model_name_list = ["Qwen/Qwen1.5-7B", "Qwen/Qwen1.5-14B", "Qwen/Qwen1.5-72B"] # cuda 4
-    model_name_list = ["Qwen/Qwen1.5-14B"]
+    data_name_list = ['StrategyQA','coinflip','cities','common','counterfact','STSA','IMDb','sarcasm','hateeval']
+    
+    model_name_list = ["google/gemma-2b", "google/gemma-7b", 
+                       "meta-llama/Llama-2-7b-chat-hf", "meta-llama/Llama-2-13b-chat-hf",
+                       "Qwen/Qwen1.5-0.5B", "Qwen/Qwen1.5-1.8B", 
+                       "Qwen/Qwen1.5-4B","Qwen/Qwen1.5-7B", "Qwen/Qwen1.5-14B"]
     
     #model_name_list = ["google/gemma-2b"]
     
     for model_name in model_name_list:
         for data_name in data_name_list:
             for noise in ['non-noise','noise']:
-                for quant in [32]:
+                for quant in [32, 16, 8]:
                     tasks.append([task_id, model_name, data_name, quant, noise])
                     task_id += 1
     with multiprocessing.Pool(parellel) as p:

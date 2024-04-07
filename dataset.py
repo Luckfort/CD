@@ -25,7 +25,7 @@ class DataProcessing():
             
         elif self.data_name == 'coinflip':
             p, q = self.coinflip()
-            prompt = 'Therefore, the answer (Yes or No) is'
+            prompt = 'According to the flipping process above, determine if a coin remains heads up after it is either flipped or left unflipped by individuals. Therefore, the answer (Yes or No) is'
             
         elif self.data_name == 'cities':
             p, q = self.cities()
@@ -45,7 +45,7 @@ class DataProcessing():
             
         elif self.data_name == 'STSA':
             p, q = self.STSA()
-            prompt = 'According to the sentence, judge the emotion is Positive or Negative.'
+            prompt = 'The sentence above is a movie review and reflects the writer\'s overall intention for this review. According to the sentence, judge the emotion is Positive or Negative.'
             
         elif self.data_name == 'IMDb':
             p, q = self.IMDb()

@@ -28,21 +28,19 @@ if args.quant != 32:
         quantization_config1 = BitsAndBytesConfig(load_in_8bit=True)
     elif args.quant == 16:
         pass
-    elif args.quant == 4:
-        quantization_config1 = BitsAndBytesConfig(load_in_4bit=True)
     else:
-        raise ValueError("We don't have this quantization bit! Please try 4, 8, 16, 32.")
+        raise ValueError("We don't have this quantization bit! Please try 8, 16, 32.")
 
 cache_dir = args.model_path
 tokenizer = AutoTokenizer.from_pretrained(args.model, cache_dir = cache_dir)
 if args.quant == 32:
     model = AutoModelForCausalLM.from_pretrained(args.model, cache_dir = cache_dir)
-elif args.quant in [4,8]:
+elif args.quant == 8:
     model = AutoModelForCausalLM.from_pretrained(args.model, quantization_config = quantization_config1, cache_dir = cache_dir)
-elif args.quant in [16]:
+elif args.quant == 16:
     model = AutoModelForCausalLM.from_pretrained(args.model, torch_dtype=torch.bfloat16, cache_dir = cache_dir)
 else:
-    raise ValueError("We don't have this quantization bit! Please try 4, 8, 16, 32.")
+    raise ValueError("We don't have this quantization bit! Please try 8, 16, 32.")
 
 #print(model.named_parameters())
 #for name, para in model.named_parameters():
