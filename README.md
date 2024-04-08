@@ -3,7 +3,7 @@
 This repository presents implementation of our work. We introduce **Concept Depth🔍** to measure where a concept is learned by different size LLMs.
 <div align=center><img src="pic/Figure1.png" width="100%" height="100%" /></div>
 
-This novel concept is used for analyze the comprehension ability of Large Language Model (LLMs), as well as the difficulty of a concept's understanding. We use probing techniques🔍 to detect the accuracy, F1-score, and AUC of classification task by the parameters on each layer.
+This novel concept is used for analyze the comprehension ability of Large Language Model (LLMs), as well as the difficulty of a concept's understanding. We use probing techniques🔍 on each layer's parameters to detect the layer accuracy, F1-score, and AUC of classification task.
 
 ## Key Discoveries💡
 
