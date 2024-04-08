@@ -7,7 +7,6 @@ import torch
 import os
 import time
 import random
-# warnings.filterwarnings('ignore')
 
 # This is the script to run the OpenKE model in parallel;
 
@@ -37,8 +36,6 @@ def run_LLM():
                        "meta-llama/Llama-2-7b-chat-hf", "meta-llama/Llama-2-13b-chat-hf",
                        "Qwen/Qwen1.5-0.5B", "Qwen/Qwen1.5-1.8B", 
                        "Qwen/Qwen1.5-4B","Qwen/Qwen1.5-7B", "Qwen/Qwen1.5-14B"]
-    
-    #model_name_list = ["google/gemma-2b"]
     
     for model_name in model_name_list:
         for data_name in data_name_list:
