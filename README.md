@@ -56,8 +56,11 @@ python3 main.py --model $MODEL --quant QUANT --noise NOISE --dataset $DATASET
 ```
 
 \$MODEL: Model name. 
+
 \$DATASET: Dataset name. 
+
 QUANT: The number of bits for quantization. Could be 8, 16, and 32.
+
 NOISE: Replace NOISE with "non-noise" or "noise". "non-noise" for no noise perturbation. "noise" for noise perturbation. Please remove the quotation marks when replacing.
 
 
