@@ -33,7 +33,7 @@ class DataProcessing():
             
         elif self.data_name == 'common':
             p, q = self.common()
-            prompt = 'Given a claim below, help me identify whether it is true or false according to the human common knowledge.'
+            prompt = 'Judge the statement is True or False.'
             
         elif self.data_name == 'counterfact':
             p, q = self.counterfact()
