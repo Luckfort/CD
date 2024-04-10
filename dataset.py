@@ -25,7 +25,7 @@ class DataProcessing():
             
         elif self.data_name == 'coinflip':
             p, q = self.coinflip()
-            prompt = 'According to the flipping process above, determine if a coin remains heads up after it is either flipped or left unflipped by individuals. Therefore, the answer (Yes or No) is'
+            prompt = 'According to the flipping process above, determine if a coin remains heads up after it is either flipped or left unflipped by individuals. Therefore, the answer (Yes or No) is?'
             
         elif self.data_name == 'cities':
             p, q = self.cities()
@@ -33,7 +33,7 @@ class DataProcessing():
             
         elif self.data_name == 'common':
             p, q = self.common()
-            prompt = 'Judge the statement is True or False.'
+            prompt = 'Given a claim below, help me identify whether it is true or false according to the human common knowledge.'
             
         elif self.data_name == 'counterfact':
             p, q = self.counterfact()
@@ -41,11 +41,11 @@ class DataProcessing():
         
         elif self.data_name == 'hateeval':
             p, q = self.hateeval()
-            prompt = 'According to the comment, tell whether they present hate speech, whether they target a specific person, and whether the tweet poster is aggressive.'
+            prompt = 'According to the comment, tell whether they present hate speech or not.'
             
         elif self.data_name == 'STSA':
             p, q = self.STSA()
-            prompt = 'The sentence above is a movie review and reflects the writer\'s overall intention for this review. According to the sentence, judge the emotion is Positive or Negative.'
+            prompt = 'The sentence above is a movie review and reflects the writer\'s overall intention for this review. According to the sentence, judge whether the emotion is Positive or Negative.'
             
         elif self.data_name == 'IMDb':
             p, q = self.IMDb()
@@ -57,7 +57,7 @@ class DataProcessing():
                     'First, we need to understand what sarcasm is. Sarcasm is a form of verbal irony, '+ '\n' \
                     'where the intended meaning of the words is the opposite of the literal meaning. '+ '\n' \
                     'In other words, the speaker is saying one thing but meaning the opposite. '
-            cot = 'Think carefully according to the sentence. Is there any sarcasm in this sentence. Please answer Yes or No.'   
+            cot = 'Think carefully according to the sentence. Is there any sarcasm in this sentence? Please answer Yes or No.'   
         
         return p, q, prompt, cot
     
