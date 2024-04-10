@@ -20,7 +20,7 @@ def run_model(task):
     #device = int(task_id % (torch.cuda.device_count()))
     
     time.sleep(random.randint(0, 5)) # sleep for a while to avoid CPU overload
-    comment = f"python3 {script} --model {model_name} --quant {quant} --cuda {1} --noise {noise} --dataset {data_name} --clf LR"
+    comment = f"python3 {script} --model {model_name} --quant {quant} --cuda {0} --noise {noise} --dataset {data_name} --clf LR"
     print(comment)
     os.system(comment)
     gc.collect()
