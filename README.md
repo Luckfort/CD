@@ -45,6 +45,16 @@ Here shows the amount of data samples we use to train the LLMs in each dataset.
 |  Sarcasm     |   6000    |
 
 ## Run the Code💻
+
+Note: if your huggingface token is not ready, please try the code below:
+```
+from huggingface_hub import notebook_login
+notebook_login()
+```
+
+**Run by Jupyter**
+Please open run.ipynb for jupyter environment.
+
 **Run by One-click**
 ```
 python run.py
