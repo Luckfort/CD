@@ -1,6 +1,6 @@
 # Exploring Concept Depth: How Large Language Models Acquire Knowledge at Different Layers?
 
-This repository presents implementation of our work. We introduce **Concept Depth🔍** to measure where a concept is learned by different size LLMs.
+This repository presents implementation of our work. We introduce **Concept Depth🔍** to measure where a concept is learned by LLMs with different sizes.
 
 Paper Link: https://arxiv.org/abs/2404.07066
 
