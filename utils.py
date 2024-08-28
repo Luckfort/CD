@@ -56,4 +56,26 @@ class LLM(torch.nn.Module):
             return torch.stack(
                 [tr[ln].output[0][None, :] if ln == "transformer.wte" else tr[ln].output[0] for ln in self.layer_names])
     
+    def parsing_yn(model, question, tokenizer, prompt):
+        # Encode the input question
+        inputs = tokenizer(question, return_tensors="pt")
         
+        # Generate a response
+        with torch.no_grad():
+            outputs = model.generate(**inputs, max_length=768)
+
+        # Decode the output
+        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        
+        response_all = response.replace(prompt, '')
+        response = response_all.split('\n')[-1]
+        # Simple logic to classify the response
+        
+        if ("false" in response.lower()) or ("negative" in response.lower()):
+            return "No", response
+        elif ("true" in response.lower()) or ("positive" in response.lower()):
+            return "Yes", response
+        elif ("yes" in response.lower()):
+            return "Yes", response
+        elif ("no" in response.lower()):
+            return "No", response # 用15个LLM来跑。gemma-2b, gemma-7b算2个, qwen-2做起 14B (LLaMA3-8B第一个跑)
