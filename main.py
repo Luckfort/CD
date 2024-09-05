@@ -9,6 +9,9 @@ import torch
 #from huggingface_hub import notebook_login
 #notebook_login()
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from accelerate import init_empty_weights, infer_auto_device_map, dispatch_model
+from accelerate import Accelerator
+accelerator = Accelerator()
 
 parser = argparse.ArgumentParser()
 
@@ -17,7 +20,8 @@ parser.add_argument('--model_path', type=str, default="/filer/tmp1/hz624/")
 parser.add_argument('--dataset', type=str, default='cities', help="Dataset")
 parser.add_argument('--datapath', type=str, default='./dataset/stsa.binary.train', help="Default data path")
 parser.add_argument('--model', type=str, default='meta-llama/Meta-Llama-3-8B', help="Which LLM to use")
-parser.add_argument('--cuda', type=int, default=0, help="Cuda ID")
+#parser.add_argument('--model', type=str, default='google/gemma-2b', help="Which LLM to use")
+parser.add_argument('--cuda', type=int, default=1, help="Cuda ID")
 parser.add_argument('--quant', type=int, default=32, help="Quantization")
 parser.add_argument('--noise', type=str, default='non-noise', help="Whether to add noise")
 parser.add_argument('--clf', type=str, default='LR', help="Classifier")
@@ -41,6 +45,10 @@ elif args.quant == 16:
     model = AutoModelForCausalLM.from_pretrained(args.model, torch_dtype=torch.bfloat16, cache_dir = cache_dir)
 else:
     raise ValueError("We don't have this quantization bit! Please try 8, 16, 32.")
+
+device_map = infer_auto_device_map(model, max_memory={0:"0GiB", 1:"32GiB", 2:"0GiB", 3:"0GiB", 4:"0GiB"}, no_split_module_classes=["LlamaDecoderLayer"]) #arrakis
+print(device_map)
+model = dispatch_model(model, device_map=device_map)
 
 #print(model.named_parameters())
 #for name, para in model.named_parameters():
@@ -83,23 +91,49 @@ rp_log_data_list = []
 rp_question_data_list = []
 
 pos = 0
-for q in tqdm(p_question):
+tp = 0
+tn = 0
+fp = 0
+fn = 0
+fail = 0
+for i, q in tqdm(enumerate(p_question)):
     input_text = DP.get_prompt(prompt, cot, q)
-    answer, response = LLM.parsing_yn(model, input_text, tokenizer, prompt)
-    print(answer)
-    print(response)
+    answer, response, response_return = Model.parsing_yn(model, input_text, tokenizer, prompt)
+    print(f"Prompt {i}:")
+    print("The answer of this prompt is:", answer)
+    print("Original response from LLM", response_return)
+    print("Use this sentence to parse:", response)
+    if answer == "Parse fail":
+        fail += 1
+        continue
     if answer == "Yes":
         pos += 1
+        tp += 1
+    else:
+        fn += 1
 
-for q in tqdm(n_question):
+for i, q in tqdm(enumerate(n_question)):
     input_text = DP.get_prompt(prompt, cot, q)
-    answer, response = LLM.parsing_yn(model, input_text, tokenizer, prompt)
-    print(answer)
-    print(response)
+    answer, response, response_return = Model.parsing_yn(model, input_text, tokenizer, prompt)
+    print(f"Prompt {i}:")
+    print("The answer of this prompt is:", answer)
+    print("Original response from LLM", response_return)
+    print("Use this sentence to parse:", response)
+    if answer == "Parse fail":
+        fail += 1
+        continue
     if answer == "No":
         pos += 1
-    
+        tn += 1
+    else:
+        fp += 1
+
 acc = 1.0 * pos / (len(p_question) + len(n_question))
+fr = 1.0 * fail / (len(p_question) + len(n_question))
+tp = 1.0 * tp / (len(p_question))
+fp = 1.0 * fp / (len(p_question))
+tn = 1.0 * tn / (len(n_question))
+fn = 1.0 * fn / (len(n_question))
 
 # for q in tqdm(p_question) :
 #     input_text = DP.get_prompt(prompt, cot, q)
@@ -221,4 +255,6 @@ save_path_final = args.savepath + f"{args.dataset}_{model_name}_{args.quant}_{ar
 #print(list_f1)
 #print(list_auc)
 
-print(acc)
+print(f"Acc = {acc}, Fail Rate = {fr}")
+print(f"TP = {tp}, TN = {tn}")
+print(f"FP = {fp}, FN = {fn}")

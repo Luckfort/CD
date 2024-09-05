@@ -40,15 +40,21 @@ class LLM(torch.nn.Module):
         for i in range(self.layer_num):
             self.layer_names.append(f'model.layers.{i}.post_attention_layernorm')
 
-    def get_hidden_states(self, model, tok, prefix, device="cuda:1"):
+    def get_hidden_states(self, model, tok, prefix, device="cuda:1", accelerator = None):
         device = f"cuda:{self.cuda_id}"
         if self.quant == 32:
-            inp = {k: torch.tensor(v)[None].to(f"cuda:{self.cuda_id}") for k, v in tok(prefix).items()}
-            model = model.to(f"cuda:{self.cuda_id}")
+            inp = {k: torch.tensor(v)[None].to(accelerator.device) for k, v in tok(prefix).items()}
+            model = model.to(accelerator.device)
             with TraceDict(model, self.layer_names) as tr:
                 logits = model(**inp)['logits']
             return torch.stack(
                 [tr[ln].output[0][None, :] if ln == "transformer.wte" else tr[ln].output[0] for ln in self.layer_names])
+            # inp = {k: torch.tensor(v)[None].to(f"cuda:{self.cuda_id}") for k, v in tok(prefix).items()}
+            # model = model.to(f"cuda:{self.cuda_id}")
+            # with TraceDict(model, self.layer_names) as tr:
+            #     logits = model(**inp)['logits']
+            # return torch.stack(
+            #     [tr[ln].output[0][None, :] if ln == "transformer.wte" else tr[ln].output[0] for ln in self.layer_names])
         else:
             inp = {k: torch.tensor(v)[None] for k, v in tok(prefix).items()}
             with TraceDict(model, self.layer_names) as tr:
@@ -56,26 +62,32 @@ class LLM(torch.nn.Module):
             return torch.stack(
                 [tr[ln].output[0][None, :] if ln == "transformer.wte" else tr[ln].output[0] for ln in self.layer_names])
     
-    def parsing_yn(model, question, tokenizer, prompt):
+    def parsing_yn(self, model, question, tokenizer, prompt, accelerator = None):
         # Encode the input question
-        inputs = tokenizer(question, return_tensors="pt")
-        
+        #inputs = tokenizer(question, return_tensors="pt").to(f"cuda:{self.cuda_id}")
+        main_device = next(model.parameters()).device
+        inputs = tokenizer(question, return_tensors="pt").to(main_device)
+        #model = model.to(f"cuda:{self.cuda_id}")
+        #model = model.to(accelerator.device)
         # Generate a response
+        input_token_count = inputs['input_ids'].shape[-1]
+        max_length = input_token_count + 64
+        
         with torch.no_grad():
-            outputs = model.generate(**inputs, max_length=768)
+            outputs = model.generate(**inputs, max_length = max_length)
 
         # Decode the output
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
         
+        response_return = response
         response_all = response.replace(prompt, '')
-        response = response_all.split('\n')[-1]
+        response_all = response_all.strip('\n').split('\n')
+        response = response_all[-1]
         # Simple logic to classify the response
         
-        if ("false" in response.lower()) or ("negative" in response.lower()):
-            return "No", response
-        elif ("true" in response.lower()) or ("positive" in response.lower()):
-            return "Yes", response
-        elif ("yes" in response.lower()):
-            return "Yes", response
-        elif ("no" in response.lower()):
-            return "No", response # 用15个LLM来跑。gemma-2b, gemma-7b算2个, qwen-2做起 14B (LLaMA3-8B第一个跑)
+        if ("yes." in response.lower()) or ("yes," in response.lower()) or ("yes " in response.lower()):
+            return "Yes", response, response_return
+        elif ("no." in response.lower()) or ("no," in response.lower()) or ("no " in response.lower()):
+            return "No", response, response_return # 用15个LLM来跑。gemma-2b, gemma-7b算2个, qwen-2做起 14B (LLaMA3-8B第一个跑)
+        else:
+            return "Parse fail", response, response_return
