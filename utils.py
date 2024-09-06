@@ -42,9 +42,10 @@ class LLM(torch.nn.Module):
 
     def get_hidden_states(self, model, tok, prefix, device="cuda:1", accelerator = None):
         device = f"cuda:{self.cuda_id}"
+        main_device = next(model.parameters()).device
         if self.quant == 32:
-            inp = {k: torch.tensor(v)[None].to(accelerator.device) for k, v in tok(prefix).items()}
-            model = model.to(accelerator.device)
+            inp = {k: torch.tensor(v)[None].to(main_device) for k, v in tok(prefix).items()}
+            model = model.to(main_device)
             with TraceDict(model, self.layer_names) as tr:
                 logits = model(**inp)['logits']
             return torch.stack(
@@ -62,7 +63,7 @@ class LLM(torch.nn.Module):
             return torch.stack(
                 [tr[ln].output[0][None, :] if ln == "transformer.wte" else tr[ln].output[0] for ln in self.layer_names])
     
-    def parsing_yn(self, model, question, tokenizer, prompt, accelerator = None):
+    def parsing_yn(self, model, question, tokenizer):
         # Encode the input question
         #inputs = tokenizer(question, return_tensors="pt").to(f"cuda:{self.cuda_id}")
         main_device = next(model.parameters()).device
@@ -78,16 +79,18 @@ class LLM(torch.nn.Module):
 
         # Decode the output
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        
+        print(response)
         response_return = response
-        response_all = response.replace(prompt, '')
-        response_all = response_all.strip('\n').split('\n')
-        response = response_all[-1]
-        # Simple logic to classify the response
+        _ = None
+        return _, _, response_return
+        #response_all = response.replace(prompt, '')
+        # response_all = response_all.strip('\n').split('\n')
+        # response = response_all[-1]
+        # # Simple logic to classify the response
         
-        if ("yes." in response.lower()) or ("yes," in response.lower()) or ("yes " in response.lower()):
-            return "Yes", response, response_return
-        elif ("no." in response.lower()) or ("no," in response.lower()) or ("no " in response.lower()):
-            return "No", response, response_return # 用15个LLM来跑。gemma-2b, gemma-7b算2个, qwen-2做起 14B (LLaMA3-8B第一个跑)
-        else:
-            return "Parse fail", response, response_return
+        # if ("yes." in response.lower()) or ("yes," in response.lower()) or ("yes " in response.lower()):
+        #     return "Yes", response, response_return
+        # elif ("no." in response.lower()) or ("no," in response.lower()) or ("no " in response.lower()):
+        #     return "No", response, response_return # 用15个LLM来跑。gemma-2b, gemma-7b算2个, qwen-2做起 14B (LLaMA3-8B第一个跑)
+        # else:
+        #     return "Parse fail", response, response_return

@@ -31,9 +31,9 @@ def run_model(task):
 """
 def run_LLM():
     task_id, tasks = 0, []
-    data_name_list = ['cities','common','counterfact','STSA','IMDb','sarcasm','hateeval','StrategyQA','coinflip']
+    #data_name_list = ['cities','common','counterfact','STSA','IMDb','sarcasm','hateeval','StrategyQA','coinflip']
     
-    #data_name_list = ['cities']
+    data_name_list = ['StrategyQA']
     
     # model_name_list = ["google/gemma-2b", "google/gemma-7b", 
     #                    "meta-llama/Llama-2-7b-chat-hf", "meta-llama/Llama-2-13b-chat-hf",

@@ -14,65 +14,77 @@ class DataProcessing():
         Select the way to get p and n samples given the dataset.
     """
     def dispacher(self):
-        cot = None
         if self.data_name == 'StrategyQA':
             p, q = self.StrategyQA()
-            prompt = 'Judge whether the answer of the question is true.  Please answer the question in the following format: first say "Yes" or "No", then tell the reasons. Answer concisely.'  + '\n' \
-                'Q: Will Queen Elizabeth be buried in the Pantheon?' + '\n' \
-                "Let us think step by step. The stem of the sentence is Queen Elizabeth, burial, pantheon. Inference: First, the Pantheon is a church, so it is possible that she could be buried there. Second, Queen Elizabeth II is still alive, so she has not been buried yet. Third, even if she were to be buried in the Pantheon, it is unlikely that we would know about it ahead of time, so it is hard to say for sure." + '\n' \
-                'pred_ans: no'
-            cot = 'Let us think step by step...'
             
         elif self.data_name == 'coinflip':
             p, q = self.coinflip()
-            prompt = 'According to the flipping process above, determine if a coin remains heads up after it is either flipped or left unflipped by individuals. Please answer the question in the following format: first say "Yes" or "No", then tell the reasons. Answer concisely.'
             
         elif self.data_name == 'cities':
             p, q = self.cities()
-            prompt = 'Judge whether the statement is True or not. Your answer should be in the following format. Answer concisely. Answer: {Yes or No}. Reason: {Why you choose that answer}'
             
         elif self.data_name == 'common':
             p, q = self.common()
-            prompt = 'Judge whether the statement is True or not. Your answer should be in the following format. Answer concisely. Answer: {Yes or No}. Reason: {Why you choose that answer}'
             
         elif self.data_name == 'counterfact':
             p, q = self.counterfact()
-            prompt = 'Judge whether the statement is true or not. Your answer should be in the following format. Answer concisely. Answer: {Yes or No}. Reason: {Why you choose that answer}'
         
         elif self.data_name == 'hateeval':
             p, q = self.hateeval()
-            prompt = 'According to the comment, tell whether they present hate speech or not. Please answer the question in the following format: first say "Yes" or "No", then tell the reasons. Answer concisely.'
             
         elif self.data_name == 'STSA':
             p, q = self.STSA()
-            prompt = 'The sentence above is a movie review and reflects the writer\'s overall intention for this review. According to the sentence, judge whether the emotion is Positive or Negative. If Positive, please say yes ahead of the answer. If Negative, please say no ahead of the answer. Please answer the question in the following format: first say "Yes" or "No", then tell the reasons. Answer concisely.'
             
         elif self.data_name == 'IMDb':
             p, q = self.IMDb()
-            prompt = 'According to the movie review, judge whether it is Positive or Negative. If Positive, please say yes ahead of the answer. If Negative, please say no ahead of the answer. Please answer the question in the following format: first say "Yes" or "No", then tell the reasons. Answer concisely.'
             
         elif self.data_name == 'sarcasm':
-            p, q = self.sarcasm()
-            prompt = 'Task: Detect sarcasm, help me identify whether this sentence is sarcastic.' + '\n' \
-                    'First, we need to understand what sarcasm is. Sarcasm is a form of verbal irony, '+ '\n' \
-                    'where the intended meaning of the words is the opposite of the literal meaning. '+ '\n' \
-                    'In other words, the speaker is saying one thing but meaning the opposite. '
-            cot = 'Think carefully according to the sentence. Is there any sarcasm in this sentence? Please answer the question in the following format: first say "Yes" or "No", then tell the reasons. Answer concisely.'   
+            p, q = self.sarcasm()   
         
-        return p, q, prompt, cot
+        return p, q
     
     """
         return the context that we enter to LLM.
     """
-    def get_prompt(self, prompt, cot, question):
-        if self.data_name in ['common','cities','counterfact']:
-            new_prompt = prompt + " " + question
-        elif self.data_name in ['STSA','coinflip','IMDb','hateeval']:
-            new_prompt = question + " " + prompt
-        elif self.data_name in ['sarcasm','StrategyQA']:
-            new_prompt = prompt + question + " " + cot
+    def get_prompt(self, question):
+        if self.data_name == 'StrategyQA':
+            prompt = 'Given an example for reasoning a question.'  + '\n' \
+                'Q: Will Queen Elizabeth be buried in the Pantheon?' + '\n' \
+                "Let us think step by step. The stem of the sentence is Queen Elizabeth, burial, pantheon. Inference: First, the Pantheon is a church, so it is possible that she could be buried there. Second, Queen Elizabeth II is still alive, so she has not been buried yet. Third, even if she were to be buried in the Pantheon, it is unlikely that we would know about it ahead of time, so it is hard to say for sure." + '\n' \
+                'pred_ans: no'
+            cot = f'Judge whether the answer of the question is true.' + '\n' + f'Question: {question} ' + '\n'+ 'Let us think step by step...'
+            prompt = prompt + cot
+            
+        elif self.data_name == 'coinflip':
+            prompt = 'According to the flipping process above, determine if a coin remains heads up after it is either flipped or left unflipped by individuals.' + '\n' + f' Statement: {question} ' + '\n' + ' Your answer is '
+            
+        elif self.data_name == 'cities':
+            prompt = f'Given the information of a country/religion and a city. Judge whether the statement is correct or not. You should reply in only Yes or No.' + '\n' + f' Statement: {question} ' + '\n' + ' Your answer is '
+            
+        elif self.data_name == 'common':
+            prompt = f'The statement is about common facts. Judge whether the statement is correct or not. You should reply in only Yes or No.' + '\n' + f' Statement: {question} ' + '\n' + ' Your answer is '
+            
+        elif self.data_name == 'counterfact':
+            prompt = f'Judge whether the statement is correct or not. You should reply in only Yes or No.' + '\n' + f' Statement: {question} ' + '\n' + ' Your answer is '
+
+        elif self.data_name == 'hateeval':
+            prompt = 'According to the comment, tell whether they present hate speech or not. You should reply in only Yes or No.' + '\n' + f' Statement: {question} ' + '\n' + ' Your answer is '
+            
+        elif self.data_name == 'STSA':
+            prompt = 'The sentence above is a movie review and reflects the writer\'s overall intention for this review. According to the sentence, judge whether the emotion is Positive. You should reply in only Yes or No.'  + '\n' + f' Statement: {question} ' + '\n' + ' Your answer is '
+            
+        elif self.data_name == 'IMDb':
+            prompt = 'According to the movie review, judge whether it is Positive. You should reply in only Yes or No.'  + '\n' + f' Statement: {question} ' + '\n' + ' Your answer is '
+            
+        elif self.data_name == 'sarcasm':
+            prompt = 'Task: Detect sarcasm, help me identify whether this sentence is sarcastic.' + '\n' \
+                    'First, we need to understand what sarcasm is. Sarcasm is a form of verbal irony, '+ '\n' \
+                    'where the intended meaning of the words is the opposite of the literal meaning. '+ '\n' \
+                    'In other words, the speaker is saying one thing but meaning the opposite. '
+            cot = f'Think carefully according to the following sentence. Sentence: {question}. Is there any sarcasm in this sentence? You should reply in only Yes or No.'  + '\n' + f' Statement: {question} ' + '\n' + ' Your answer is '
+            prompt = prompt + cot
         
-        return new_prompt
+        return prompt
     
     def STSA(self):
         p_question = []
