@@ -121,12 +121,10 @@ Other cases could be found here.
 ## Citation
 Please cite the following paper corresponding to the repository:
 ```
-@misc{jin2024exploring,
-      title={Exploring Concept Depth: How Large Language Models Acquire Knowledge at Different Layers?}, 
-      author={Mingyu Jin and Qinkai Yu and Jingyuan Huang and Qingcheng Zeng and Zhenting Wang and Wenyue Hua and Haiyan Zhao and Kai Mei and Yanda Meng and Kaize Ding and Fan Yang and Mengnan Du and Yongfeng Zhang},
-      year={2024},
-      eprint={2404.07066},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL}
+@article{jin2024exploring,
+  title={Exploring Concept Depth: How Large Language Models Acquire Knowledge at Different Layers?},
+  author={Jin, Mingyu and Yu, Qinkai and Huang, Jingyuan and Zeng, Qingcheng and Wang, Zhenting and Hua, Wenyue and Zhao, Haiyan and Mei, Kai and Meng, Yanda and Ding, Kaize and others},
+  journal={arXiv preprint arXiv:2404.07066},
+  year={2024}
 }
 ```
