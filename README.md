@@ -1,12 +1,12 @@
 # Exploring Concept Depth: How Large Language Models Acquire Knowledge at Different Layers?
 
-This repository presents implementation of our work. We introduce **Concept Depth🔍** to measure where a concept is learned by LLMs with different sizes.
+This repository presents the implementation of our work. We introduce **Concept Depth🔍** to measure where a concept is learned by LLMs with different sizes.
 
 Paper Link: https://arxiv.org/abs/2404.07066
 
 <div align=center><img src="pic/Figure1.png" width="100%" height="100%" /></div>
 
-This novel concept is used for analyze the comprehension ability of Large Language Model (LLMs), as well as the difficulty of a concept's understanding. We use probing techniques🔍 on each layer's parameters to detect the layer accuracy, F1-score, and AUC of classification task.
+This novel concept is used to analyze the comprehension ability of Large Language Models (LLM) and the difficulty of a concept's understanding. We use probing techniques🔍 on each layer's embedding to detect the layer accuracy, F1-score, and AUC of the classification task.
 
 ## Key Discoveries💡
 
@@ -25,7 +25,7 @@ pip install -r requirements.txt
 
 ## Dataset📕
 
-We apply 9 datasets to evaluate **Concept Depth**. 
+We apply nine datasets to evaluate **Concept Depth**. 
 
 **Raw Files**
 ```
@@ -33,7 +33,7 @@ See: ./dataset
 ``` 
 **Dataset Size**
 
-Here shows the amount of data samples we use to train the LLMs in each dataset.
+Here shows the data samples we use to train the LLMs in each dataset.
 
 |  Dataset     | Number of Samples |
 | ------------ | --------- |
