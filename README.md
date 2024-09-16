@@ -68,6 +68,11 @@ python run.py
 python3 main.py --model $MODEL --quant QUANT --noise NOISE --dataset $DATASET
 ```
 
+**Run Anchoring Experiments by Instructions**
+```
+python3 main_anchor.py --dataset $DATASET
+```
+
 \$MODEL: Model name. 
 
 \$DATASET: Dataset name. 
@@ -90,6 +95,11 @@ python3 main.py --model google/gemma-2b --dataset STSA --quant 16
 If we want to train Gemma-2B over dataset STSA with noise perturbation, the instruction is:
 ```
 python3 main.py --model google/gemma-2b --dataset STSA --noise noise
+```
+
+For anchoring experiment, if we want to try dataset STSA, the instruction is:
+```
+python3 main_anchor.py --dataset STSA
 ```
 
 Other cases could be found here.
