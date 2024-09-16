@@ -118,13 +118,3 @@ Other cases could be found here.
 |  IMDb        |  IMDb        |
 |  Sarcasm     |  sarcasm     |
 
-## Citation
-Please cite the following paper corresponding to the repository:
-```
-@article{jin2024exploring,
-  title={Exploring Concept Depth: How Large Language Models Acquire Knowledge at Different Layers?},
-  author={Jin, Mingyu and Yu, Qinkai and Huang, Jingyuan and Zeng, Qingcheng and Wang, Zhenting and Hua, Wenyue and Zhao, Haiyan and Mei, Kai and Meng, Yanda and Ding, Kaize and others},
-  journal={arXiv preprint arXiv:2404.07066},
-  year={2024}
-}
-```
