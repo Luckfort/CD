@@ -40,11 +40,12 @@ class LLM(torch.nn.Module):
         for i in range(self.layer_num):
             self.layer_names.append(f'model.layers.{i}.post_attention_layernorm')
 
-    def get_hidden_states(self, model, tok, prefix, device="cuda:1"):
+    def get_hidden_states(self, model, tok, prefix, device="cuda:1", accelerator = None):
         device = f"cuda:{self.cuda_id}"
+        main_device = next(model.parameters()).device
         if self.quant == 32:
-            inp = {k: torch.tensor(v)[None].to(f"cuda:{self.cuda_id}") for k, v in tok(prefix).items()}
-            model = model.to(f"cuda:{self.cuda_id}")
+            inp = {k: torch.tensor(v)[None].to(main_device) for k, v in tok(prefix).items()}
+            model = model.to(main_device)
             with TraceDict(model, self.layer_names) as tr:
                 logits = model(**inp)['logits']
             return torch.stack(
@@ -55,5 +56,3 @@ class LLM(torch.nn.Module):
                 logits = model(**inp)['logits']
             return torch.stack(
                 [tr[ln].output[0][None, :] if ln == "transformer.wte" else tr[ln].output[0] for ln in self.layer_names])
-    
-        
