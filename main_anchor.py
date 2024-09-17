@@ -1,6 +1,5 @@
 from dataset_anchor import DataProcessing_Anchor
 import json
-from utils_anchor import add_noise, LLM
 import argparse
 import os
 import sys
@@ -31,7 +30,6 @@ parser.add_argument('--datapath', type=str, default='./dataset/stsa.binary.train
 parser.add_argument('--model', type=str, default='meta-llama/Meta-Llama-3-8B-Instruct', help="Which LLM to use")
 parser.add_argument('--quant', type=int, default=32, help="Quantization")
 parser.add_argument('--noise', type=str, default='non-noise', help="Whether to add noise")
-parser.add_argument('--clf', type=str, default='LR', help="Classifier")
 
 args = parser.parse_args()
 if args.quant != 32:
@@ -59,7 +57,7 @@ device_map = infer_auto_device_map(
     model, 
     max_memory={0:"0GiB", 1:"8GiB", 2:"16GiB", 3:"8GiB", 4:"8GiB"},
     no_split_module_classes = no_split_module_classes
-) #arrakis
+)
 
 model = dispatch_model(model, device_map=device_map)
 file_path = args.datapath
@@ -79,8 +77,6 @@ p_question, n_question = DP.dispacher()
 token_ = "Ġ"
 token_y_list = torch.tensor([tokenizer.convert_tokens_to_ids(token_ + y) for y in ['yes', 'Yes', 'YES']]).long()
 token_n_list = torch.tensor([tokenizer.convert_tokens_to_ids(token_ + n) for n in ['no', 'No', 'NO']]).long()
-
-Model = LLM(cuda_id = args.cuda, layer_num = tot_layer, quant = args.quant)
 
 print("Model is training ...")
 list_acc = []
