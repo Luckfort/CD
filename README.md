@@ -4,6 +4,8 @@ This repository presents the implementation of our work. We introduce **Concept 
 
 Paper Link: https://arxiv.org/abs/2404.07066
 
+Project Website: https://luckfort.github.io/explore_CD
+
 <div align=center><img src="pic/Figure1.png" width="100%" height="100%" /></div>
 
 This novel concept is used to analyze the comprehension ability of Large Language Models (LLM) and the difficulty of a concept's understanding. We use probing techniques🔍 on each layer's embedding to detect the layer accuracy, F1-score, and AUC of the classification task.
