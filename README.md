@@ -2,7 +2,7 @@
 
 This repository presents the implementation of our work. We introduce **Concept Depth🔍** to measure where a concept is learned by LLMs with different sizes.
 
-Paper Link: https://arxiv.org/abs/2404.07066
+Paper Link: https://arxiv.org/abs/2404.07066 , Accepted By **COLING 2025**
 
 Project Website: https://luckfort.github.io/explore_CD
 
