@@ -2,7 +2,7 @@
 
 This repository presents the implementation of our work. We introduce **Concept Depth🔍** to measure where a concept is learned by LLMs with different sizes.
 
-Paper Link: https://arxiv.org/abs/2404.07066 , Accepted By **COLING 2025**
+Paper Link: https://arxiv.org/abs/2404.07066 and https://aclanthology.org/2025.coling-main.37/, Accepted By **COLING 2025**
 
 Project Website: https://luckfort.github.io/explore_CD
 
@@ -133,10 +133,33 @@ Other cases could be found here.
 ## Citation
 Please cite the following paper corresponding to the repository:
 ```
+@inproceedings{jin-etal-2025-exploring,
+    title = "Exploring Concept Depth: How Large Language Models Acquire Knowledge and Concept at Different Layers?",
+    author = "Jin, Mingyu  and Yu, Qinkai  and
+      Huang, Jingyuan  and
+      Zeng, Qingcheng  and
+      Wang, Zhenting  and
+      Hua, Wenyue  and
+      Zhao, Haiyan  and
+      Mei, Kai  and
+      Meng, Yanda  and
+      Ding, Kaize  and
+      Yang, Fan  and
+      Du, Mengnan  and
+      Zhang, Yongfeng",
+    booktitle = "Proceedings of the 31st International Conference on Computational Linguistics",
+    month = jan,
+    year = "2025",
+    address = "Abu Dhabi, UAE",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2025.coling-main.37/",
+    pages = "558--573",
+}
 @article{jin2024exploring,
   title={Exploring Concept Depth: How Large Language Models Acquire Knowledge at Different Layers?},
   author={Jin, Mingyu and Yu, Qinkai and Huang, Jingyuan and Zeng, Qingcheng and Wang, Zhenting and Hua, Wenyue and Zhao, Haiyan and Mei, Kai and Meng, Yanda and Ding, Kaize and others},
   journal={arXiv preprint arXiv:2404.07066},
   year={2024}
 }
+
 ```
